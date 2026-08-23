@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: nexus-campus
+    env: python
+    plan: free
+    buildCommand: "python -m pip install -r requirements.txt"
+    startCommand: "python server.py"
+    healthCheckPath: /api/health
+    envVars:
+      - key: ADMIN_PASSWORD
+        sync: false

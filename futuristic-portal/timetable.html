@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Timetable — Nexus Campus</title>
+<script src="js/theme.js?v=3.0.0"></script>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="stylesheet" href="css/style.css?v=3.0.0" />
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main">
+    <div class="page-header">
+      <div>
+        <span class="eyebrow">This week</span>
+        <h1>Timetable</h1>
+      </div>
+    </div>
+
+    <div class="card timetable-grid">
+      <table id="timetable-table"><tbody><tr><td>Loading…</td></tr></tbody></table>
+    </div>
+  </main>
+</div>
+
+<script src="js/auth.js?v=3.0.0"></script>
+<script src="js/api.js?v=3.0.0"></script>
+<script>
+  requireLogin();renderSidebar("timetable.html");
+  const CHIP_COLORS=[{bg:"rgba(0,229,255,0.14)",fg:"var(--cyan)"},{bg:"rgba(255,62,201,0.14)",fg:"var(--magenta)"},{bg:"rgba(139,92,246,0.14)",fg:"var(--purple)"},{bg:"rgba(57,255,136,0.14)",fg:"var(--green)"},{bg:"rgba(255,209,102,0.14)",fg:"var(--yellow)"}];
+  function colorFor(subject){let hash=0;for(let i=0;i<subject.length;i++)hash=subject.charCodeAt(i)+((hash<<5)-hash);return CHIP_COLORS[Math.abs(hash)%CHIP_COLORS.length];}
+  async function loadTimetable(){const table=document.getElementById("timetable-table");try{const data=await getTimetable();const days=Array.isArray(data.days)?data.days:[],periods=Array.isArray(data.periods)?data.periods:[],grid=Array.isArray(data.grid)?data.grid:[];const header=`<tr><th>Time</th>${days.map(d=>`<th>${nexusEscape(d)}</th>`).join("")}</tr>`;const body=periods.map((period,pi)=>`<tr><td>${nexusEscape(period)}</td>${days.map((_,di)=>{const subject=String(grid?.[di]?.[pi]??"—");if(subject==="Lunch")return`<td style="color:var(--text-dim)">${nexusEscape(subject)}</td>`;const c=colorFor(subject);return`<td><span class="subject-chip" style="background:${c.bg};color:${c.fg}">${nexusEscape(subject)}</span></td>`;}).join("")}</tr>`).join("");table.innerHTML=`<thead>${header}</thead><tbody>${body}</tbody>`;}catch(err){table.innerHTML=`<tbody><tr><td class="error-msg">${nexusEscape(err.message||"Could not load timetable.")}</td></tr></tbody>`;}}
+  loadTimetable();
+</script>
+</body>
+</html>
